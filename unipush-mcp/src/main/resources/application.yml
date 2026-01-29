@@ -1,0 +1,33 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: unipush-mcp
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:nacos:unipush-mcp.yml?namespace=unipush&group=DEFAULT_GROUP
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.31.88:8848
+        namespace: unipush
+        group: DEFAULT_GROUP
+        enabled: true
+        register-enabled: true
+      config:
+        server-addr: 192.168.31.88:8848
+        namespace: unipush
+        file-extension: yml
+        shared-configs:
+          - data-id: unipush-common.yml
+            refresh: true
+
+# 日志配置
+logging:
+  level:
+    top.zhengru.unipush: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"

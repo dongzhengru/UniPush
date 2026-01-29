@@ -1,0 +1,87 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: unipush-api
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:nacos:unipush-api.yml?namespace=unipush&group=DEFAULT_GROUP
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.31.88:8848
+        namespace: unipush
+        group: DEFAULT_GROUP
+        enabled: true
+        register-enabled: true
+      config:
+        server-addr: 192.168.31.88:8848
+        namespace: unipush
+        file-extension: yml
+        shared-configs:
+          - data-id: unipush-common.yml
+            refresh: true
+
+# Dubbo配置
+dubbo:
+  application:
+    name: unipush-api
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: nacos://192.168.31.88:8848?namespace=unipush
+  consumer:
+    timeout: 5000
+    retries: 2
+
+# Sentinel配置
+spring.cloud.sentinel:
+  transport:
+    dashboard: 192.168.31.88:8858
+  eager: true
+
+# Redis配置
+spring.data.redis:
+  host: 127.0.0.1
+  port: 6379
+  database: 0
+  password:
+  timeout: 3000
+  lettuce:
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+
+# 数据源配置
+spring.datasource:
+  type: com.alibaba.druid.pool.DruidDataSource
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  druid:
+    initial-size: 5
+    max-active: 50
+    min-idle: 5
+    max-wait: 60000
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  type-aliases-package: top.zhengru.unipush.common.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+  global-config:
+    db-config:
+      id-type: auto
+
+# 日志配置
+logging:
+  level:
+    top.zhengru.unipush: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
