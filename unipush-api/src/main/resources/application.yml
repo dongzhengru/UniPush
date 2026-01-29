@@ -17,6 +17,8 @@ spring:
         group: DEFAULT_GROUP
         enabled: true
         register-enabled: true
+        ip: 192.168.31.101
+        port: 8080
       config:
         server-addr: 192.168.31.88:8848
         namespace: unipush
