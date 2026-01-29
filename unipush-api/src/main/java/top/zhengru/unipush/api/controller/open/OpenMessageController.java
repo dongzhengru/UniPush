@@ -1,12 +1,12 @@
 package top.zhengru.unipush.api.controller.open;
 
-import com.alibaba.fastjson2.JSON;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
+import top.zhengru.unipush.common.api.PushCoreService;
 import top.zhengru.unipush.common.enums.ResponseCode;
 import top.zhengru.unipush.common.exception.BusinessException;
 import top.zhengru.unipush.common.model.dto.BatchSendMessageDTO;
@@ -14,9 +14,10 @@ import top.zhengru.unipush.common.model.dto.SendMessageDTO;
 import top.zhengru.unipush.common.model.vo.BatchSendResultItemVO;
 import top.zhengru.unipush.common.model.vo.MessageResultVO;
 import top.zhengru.unipush.common.model.vo.ResponseVO;
-import top.zhengru.unipush.common.util.JsonUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 开放消息接口
@@ -27,6 +28,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/open/message")
 public class OpenMessageController {
+
+    @DubboReference
+    private PushCoreService pushCoreService;
 
     /**
      * 查询消息发送结果
@@ -39,10 +43,8 @@ public class OpenMessageController {
     public ResponseVO<MessageResultVO> sendMessageResult(
             @Parameter(description = "消息ID", required = true, example = "1234567890")
             @RequestParam("messageId") String messageId) {
-        // TODO: 调用Core服务查询消息结果
-        MessageResultVO result = new MessageResultVO();
-        result.setStatus(2);
-        result.setErrorMessage("");
+        // 调用Core服务查询消息结果
+        MessageResultVO result = pushCoreService.getMessageResult(messageId);
         return ResponseVO.ok(result);
     }
 
@@ -57,7 +59,6 @@ public class OpenMessageController {
     public ResponseVO<String> send(
             @Parameter(description = "发送消息请求参数", required = true)
             @Valid @RequestBody SendMessageDTO request) {
-        // TODO: 调用Core服务发送消息
         // 1. 验证时间戳
         long currentTime = System.currentTimeMillis();
         if (Math.abs(currentTime - request.getTimestamp()) > 300000) { // 5分钟
@@ -65,10 +66,9 @@ public class OpenMessageController {
         }
 
         // 2. 调用Core服务创建推送任务
-        // String messageId = coreService.createPushTask(request);
+        String messageId = pushCoreService.createPushTask(request);
 
-        // 3. 返回消息ID（模拟）
-        String messageId = "075074e3c17e449e9a0cb79cc6f3fc83";
+        // 3. 返回消息ID
         return ResponseVO.ok(messageId, "请求成功，请用messageId查询最终发送结果");
     }
 
@@ -83,7 +83,6 @@ public class OpenMessageController {
     public ResponseVO<List<BatchSendResultItemVO>> sendBatch(
             @Parameter(description = "批量发送消息请求参数", required = true)
             @Valid @RequestBody BatchSendMessageDTO request) {
-        // TODO: 调用Core服务批量发送消息
         // 1. 验证时间戳
         long currentTime = System.currentTimeMillis();
         if (Math.abs(currentTime - request.getTimestamp()) > 300000) { // 5分钟
@@ -91,28 +90,45 @@ public class OpenMessageController {
         }
 
         // 2. 遍历渠道，依次调用Core服务创建推送任务
-        List<BatchSendResultItemVO> results = List.of(
-                createResultItem("f9117123dc31434fa38917b7e4c6c3ff", "dingtalk"),
-                createResultItem("39821494381133a3a19a5bcd3c2bf0d7", "webhook"),
-                createResultItem("d12c767e882922eeaa17e70e0e1cfb15", "sms")
-        );
+        List<BatchSendResultItemVO> results = new ArrayList<>();
+
+        for (String channelStr : request.getChannel()) {
+            try {
+                // 为每个渠道创建SendMessageDTO
+                SendMessageDTO sendRequest = new SendMessageDTO();
+                sendRequest.setChannel(channelStr);
+                sendRequest.setTitle(request.getTitle());
+                sendRequest.setContent(request.getContent());
+                // target需要类型转换
+                if (request.getTarget() instanceof Map) {
+                    sendRequest.setTarget((Map<String, Object>) request.getTarget());
+                }
+                sendRequest.setTemplate(request.getTemplate());
+                sendRequest.setTopic(request.getTopic());
+                sendRequest.setCallbackUrl(request.getCallbackUrl());
+                sendRequest.setTimestamp(request.getTimestamp());
+
+                // 调用Core服务
+                String messageId = pushCoreService.createPushTask(sendRequest);
+
+                // 创建成功结果
+                BatchSendResultItemVO item = new BatchSendResultItemVO();
+                item.setMessageId(messageId);
+                item.setChannel(channelStr);
+                item.setCode(200);
+                item.setMsg("请求成功，请用messageId查询最终发送结果");
+                results.add(item);
+
+            } catch (Exception e) {
+                // 创建失败结果
+                BatchSendResultItemVO item = new BatchSendResultItemVO();
+                item.setChannel(channelStr);
+                item.setCode(500);
+                item.setMsg("发送失败: " + e.getMessage());
+                results.add(item);
+            }
+        }
 
         return ResponseVO.ok(results, "执行成功");
-    }
-
-    /**
-     * 创建批量发送结果项（模拟）
-     *
-     * @param messageId 消息ID
-     * @param channel   渠道
-     * @return 结果项
-     */
-    private BatchSendResultItemVO createResultItem(String messageId, String channel) {
-        BatchSendResultItemVO item = new BatchSendResultItemVO();
-        item.setMessageId(messageId);
-        item.setMsg("请求成功，请用messageId查询最终发送结果");
-        item.setCode(200);
-        item.setChannel(channel);
-        return item;
     }
 }

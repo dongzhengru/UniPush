@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 发送消息请求DTO
@@ -39,7 +40,7 @@ public class SendMessageDTO implements Serializable {
      * 推送目标（JSON对象，依通道具体定义）
      */
     @NotNull(message = "推送目标不能为空")
-    private Object target;
+    private Map<String, Object> target;
 
     /**
      * 主题/分组

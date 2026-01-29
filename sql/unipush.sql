@@ -122,7 +122,6 @@ CREATE TABLE `push_message`
     `template_code`     VARCHAR(100) DEFAULT NULL COMMENT '使用的模板编码',
     `topic`             VARCHAR(100) DEFAULT NULL COMMENT '主题/分组',
     `callback_url`      VARCHAR(500) DEFAULT NULL COMMENT '回调URL',
-    `app_key`           VARCHAR(64)  DEFAULT NULL COMMENT '调用方AppKey',
     `status`            VARCHAR(20)  NOT NULL DEFAULT 'INIT' COMMENT '状态：INIT-初始化 PENDING-待发送 SENDING-发送中 SUCCESS-成功 FAILED-失败',
     `retry_count`       INT          NOT NULL DEFAULT 0 COMMENT '重试次数',
     `max_retry_count`   INT          NOT NULL DEFAULT 3 COMMENT '最大重试次数',
@@ -138,7 +137,6 @@ CREATE TABLE `push_message`
     KEY `idx_channel_code` (`channel_code`),
     KEY `idx_status` (`status`),
     KEY `idx_create_time` (`create_time`),
-    KEY `idx_app_key` (`app_key`),
     KEY `idx_next_retry_time` (`next_retry_time`),
     KEY `idx_topic` (`topic`)
 ) ENGINE = InnoDB

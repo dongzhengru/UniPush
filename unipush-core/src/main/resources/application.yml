@@ -67,14 +67,19 @@ dubbo:
   protocol:
     name: dubbo
     port: 20881
+    host: 192.168.31.101
   registry:
     address: nacos://192.168.31.88:8848?namespace=unipush
+    register: true
+    parameters:
+      register.ip: 192.168.31.101
   provider:
     timeout: 10000
     retries: 0
 
 # Kafka配置
 spring.kafka:
+  bootstrap-servers: 192.168.31.88:9092
   producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -86,6 +91,12 @@ spring.kafka:
     group-id: unipush-core-group
     auto-offset-reset: latest
     enable-auto-commit: false
+
+# Kafka Topic配置
+kafka:
+  topic:
+    delivery: unipush-delivery
+    result: unipush-result
 
 # Redis配置
 spring.data.redis:

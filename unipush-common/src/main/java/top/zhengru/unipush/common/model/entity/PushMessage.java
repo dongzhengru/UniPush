@@ -64,11 +64,6 @@ public class PushMessage implements Serializable {
     private String callbackUrl;
 
     /**
-     * 调用方令牌
-     */
-    private String accessToken;
-
-    /**
      * 状态：INIT-初始化 PENDING-待发送 SENDING-发送中 SUCCESS-成功 FAILED-失败
      */
     private String status;
