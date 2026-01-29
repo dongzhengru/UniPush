@@ -87,3 +87,29 @@ logging:
     top.zhengru.unipush: debug
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+
+# Springdoc OpenAPI (Swagger) 配置
+springdoc:
+  api-docs:
+    # 启用API文档
+    enabled: true
+    # API文档路径
+    path: /v3/api-docs
+  swagger-ui:
+    # 启用Swagger UI
+    enabled: true
+    # Swagger UI路径
+    path: /swagger-ui.html
+    # 默认展开所有接口
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    # 默认分组展开
+    default-consumes-expand-depth: 1
+    default-produces-expand-depth: 1
+    # 排序方式
+    tags-sorter: alpha
+    operations-sorter: alpha
+  # 显示请求属性
+  show-actuator: false
+  # JWT Token配置
+  show-jwt: true

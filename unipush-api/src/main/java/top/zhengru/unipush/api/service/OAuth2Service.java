@@ -5,15 +5,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import top.zhengru.unipush.api.config.OAuth2Properties;
 import top.zhengru.unipush.api.model.dto.OAuth2TokenResponse;
+import top.zhengru.unipush.common.enums.ResponseCode;
+import top.zhengru.unipush.common.exception.OAuth2Exception;
 import top.zhengru.unipush.common.model.dto.OAuth2UserInfo;
 import top.zhengru.unipush.common.model.entity.SysUser;
 import top.zhengru.unipush.common.util.JsonUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 /**
  * OAuth2服务
@@ -59,24 +68,32 @@ public class OAuth2Service {
         try {
             WebClient client = webClientBuilder.build();
 
-            String response = client.post()
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("grant_type", "authorization_code");
+            formData.add("code", code);
+            formData.add("redirect_uri", oAuth2Properties.getRedirectUri());
+
+            String credentials = oAuth2Properties.getClientId() + ":" + oAuth2Properties.getClientSecret();
+            String encodedCredentials = Base64.getEncoder()
+                    .encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+
+            OAuth2TokenResponse response = client.post()
                     .uri(oAuth2Properties.getTokenUri())
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .bodyValue(String.format(
-                            "grant_type=authorization_code&code=%s&redirect_uri=%s&client_id=%s&client_secret=%s",
-                            code,
-                            oAuth2Properties.getRedirectUri(),
-                            oAuth2Properties.getClientId(),
-                            oAuth2Properties.getClientSecret()
-                    ))
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials)
+                    .body(BodyInserters.fromFormData(formData))
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono(OAuth2TokenResponse.class)
                     .block();
 
-            return JsonUtils.parseObject(response, OAuth2TokenResponse.class);
+            return response;
         } catch (Exception e) {
             logger.error("获取访问令牌失败", e);
-            throw new RuntimeException("获取访问令牌失败: " + e.getMessage());
+            throw new OAuth2Exception(
+                    ResponseCode.OAUTH2_TOKEN_ERROR.getCode(),
+                    "获取访问令牌失败",
+                    e.getMessage()
+            );
         }
     }
 
@@ -100,7 +117,11 @@ public class OAuth2Service {
             return JsonUtils.parseObject(response, OAuth2UserInfo.class);
         } catch (Exception e) {
             logger.error("获取用户信息失败", e);
-            throw new RuntimeException("获取用户信息失败: " + e.getMessage());
+            throw new OAuth2Exception(
+                    ResponseCode.OAUTH2_USER_INFO_ERROR.getCode(),
+                    "获取用户信息失败",
+                    e.getMessage()
+            );
         }
     }
 
@@ -117,7 +138,7 @@ public class OAuth2Service {
         if (user == null) {
             // 用户不存在，抛出异常
             logger.warn("用户不存在: phone={}", userInfo.getPhoneNumber());
-            throw new RuntimeException("用户不存在，请联系管理员添加");
+            throw new OAuth2Exception(ResponseCode.OAUTH2_USER_NOT_FOUND);
         }
 
         // 用户已存在，更新用户信息

@@ -1,5 +1,8 @@
 package top.zhengru.unipush.api.controller.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,7 @@ import java.util.Map;
  *
  * @author zhengru
  */
+@Tag(name = "OAuth2认证", description = "OAuth2登录和认证相关接口")
 @RestController
 @RequestMapping("/api/web/oauth2")
 public class OAuth2Controller {
@@ -46,6 +50,7 @@ public class OAuth2Controller {
      *
      * @return 授权地址
      */
+    @Operation(summary = "获取OAuth2授权地址", description = "获取OAuth2授权链接和随机state参数，用于发起OAuth2登录")
     @GetMapping("/authorize")
     public ResponseVO<Map<String, String>> getAuthorizeUrl() {
         // 生成随机state，防止CSRF攻击
@@ -66,10 +71,14 @@ public class OAuth2Controller {
      * @param state 状态
      * @return 重定向到前端
      */
+    @Operation(summary = "OAuth2登录回调", description = "OAuth2授权服务器回调接口，处理用户登录并重定向到前端")
     @GetMapping("/callback")
-    public RedirectView callback(@RequestParam("code") String code,
-                                 @RequestParam("state") String state,
-                                 HttpServletRequest request) {
+    public RedirectView callback(
+            @Parameter(description = "OAuth2授权码", required = true)
+            @RequestParam("code") String code,
+            @Parameter(description = "状态参数，用于防止CSRF攻击", required = true)
+            @RequestParam("state") String state,
+            HttpServletRequest request) {
         try {
             logger.info("OAuth2回调: code={}, state={}", code, state);
 
@@ -110,22 +119,35 @@ public class OAuth2Controller {
      * @param token JWT Token
      * @return 用户信息
      */
+    @Operation(summary = "获取当前登录用户信息", description = "根据JWT Token获取完整的用户信息")
     @GetMapping("/userinfo")
-    public ResponseVO<LoginUserVO> getUserInfo(@RequestParam("token") String token) {
+    public ResponseVO<LoginUserVO> getUserInfo(
+            @Parameter(description = "JWT Token", required = true, example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+            @RequestParam("token") String token) {
         try {
             // 验证Token
             if (!jwtUtils.validateToken(token)) {
                 return ResponseVO.fail("Token无效或已过期");
             }
 
-            // 从Token中获取用户信息
+            // 从Token中获取用户ID
             Long userId = jwtUtils.getUserIdFromToken(token);
-            String username = jwtUtils.getUsernameFromToken(token);
 
-            // TODO: 调用UserService获取完整用户信息
+            // 调用UserService获取完整用户信息
+            SysUser user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseVO.fail("用户不存在");
+            }
+
+            // 转换为LoginUserVO
             LoginUserVO loginUser = new LoginUserVO();
-            loginUser.setId(userId);
-            loginUser.setUsername(username);
+            loginUser.setId(user.getId());
+            loginUser.setUsername(user.getUsername());
+            loginUser.setNickname(user.getNickname());
+            loginUser.setEmail(user.getEmail());
+            loginUser.setPhone(user.getPhone());
+            loginUser.setAvatar(user.getAvatar());
+            loginUser.setRole(user.getRole());
             loginUser.setToken(token);
 
             return ResponseVO.ok(loginUser);

@@ -42,7 +42,7 @@ public class AccessTokenService {
         wrapper.orderByDesc(AccessToken::getCreateTime);
         List<AccessToken> tokens = accessTokenMapper.selectList(wrapper);
 
-        return tokens.stream().map(this::convertToVO).collect(Collectors.toList());
+        return tokens.stream().map(token -> convertToVO(token, true)).collect(Collectors.toList());
     }
 
     /**
@@ -53,7 +53,7 @@ public class AccessTokenService {
      */
     public TokenInfoVO getTokenById(Long id) {
         AccessToken token = accessTokenMapper.selectById(id);
-        return token != null ? convertToVO(token) : null;
+        return token != null ? convertToVO(token, true) : null;
     }
 
     /**
@@ -108,6 +108,7 @@ public class AccessTokenService {
         accessToken.setStatus(1);
         accessToken.setExpireTime(expireTime);
         accessToken.setCreatorId(creatorId);
+        accessToken.setCreateTime(LocalDateTime.now());
 
         accessTokenMapper.insert(accessToken);
         logger.info("创建令牌成功: tokenName={}", tokenName);
@@ -116,7 +117,8 @@ public class AccessTokenService {
         String cacheKey = RedisConstants.ACCESS_TOKEN_KEY + token;
         redisUtils.set(cacheKey, accessToken, 3600, java.util.concurrent.TimeUnit.SECONDS);
 
-        return convertToVO(accessToken);
+        // 创建令牌时返回完整令牌，不脱敏
+        return convertToVO(accessToken, false);
     }
 
     /**
@@ -206,24 +208,26 @@ public class AccessTokenService {
      * @return 令牌
      */
     private String generateToken() {
-        return "ut_" + SnowflakeIdUtils.getInstance().nextIdStr() + "_" +
-               System.currentTimeMillis();
+        return "ut_" + SnowflakeIdUtils.getInstance().nextIdStr();
     }
 
     /**
      * 转换为VO
      *
      * @param token 令牌实体
+     * @param mask  是否脱敏：true-脱敏 false-不脱敏
      * @return 令牌VO
      */
-    private TokenInfoVO convertToVO(AccessToken token) {
+    private TokenInfoVO convertToVO(AccessToken token, boolean mask) {
         TokenInfoVO vo = new TokenInfoVO();
         vo.setId(token.getId());
-        // 脱敏显示，只显示前8位和后8位
+        // 根据参数决定是否脱敏显示
         String tokenStr = token.getToken();
-        if (tokenStr != null && tokenStr.length() > 16) {
+        if (mask && tokenStr != null && tokenStr.length() > 16) {
+            // 脱敏显示，只显示前8位和后8位
             vo.setToken(tokenStr.substring(0, 8) + "****" + tokenStr.substring(tokenStr.length() - 8));
         } else {
+            // 不脱敏，返回完整令牌
             vo.setToken(tokenStr);
         }
         vo.setTokenName(token.getTokenName());

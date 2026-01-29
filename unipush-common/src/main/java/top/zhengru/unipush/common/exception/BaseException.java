@@ -12,17 +12,17 @@ public class BaseException extends RuntimeException {
     /**
      * 错误码
      */
-    private Integer code;
+    protected Integer code;
 
     /**
      * 错误提示
      */
-    private String message;
+    protected String message;
 
     /**
      * 错误明细
      */
-    private String detailMessage;
+    protected String detailMessage;
 
     public BaseException() {
     }
@@ -34,6 +34,12 @@ public class BaseException extends RuntimeException {
     public BaseException(Integer code, String message) {
         this.code = code;
         this.message = message;
+    }
+
+    public BaseException(Integer code, String message, String detailMessage) {
+        this.code = code;
+        this.message = message;
+        this.detailMessage = detailMessage;
     }
 
     public Integer getCode() {

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import top.zhengru.unipush.common.enums.ResponseCode;
 import top.zhengru.unipush.common.exception.BaseException;
 import top.zhengru.unipush.common.exception.BusinessException;
+import top.zhengru.unipush.common.exception.OAuth2Exception;
 import top.zhengru.unipush.common.model.vo.ResponseVO;
 
 import java.util.stream.Collectors;
@@ -26,6 +27,16 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /**
+     * OAuth2认证异常
+     */
+    @ExceptionHandler(OAuth2Exception.class)
+    public ResponseVO<Void> handleOAuth2Exception(OAuth2Exception e, HttpServletRequest request) {
+        logger.error("OAuth2异常：URI={}, Code={}, Message={}, Detail={}",
+                request.getRequestURI(), e.getCode(), e.getMessage(), e.getDetailMessage());
+        return ResponseVO.fail(e.getCode(), e.getMessage());
+    }
 
     /**
      * 业务异常

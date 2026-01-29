@@ -52,6 +52,9 @@
 
         <!-- Dubbo -->
         <dubbo.version>3.3.0-beta.1</dubbo.version>
+
+        <!-- Springdoc OpenAPI -->
+        <springdoc.version>2.3.0</springdoc.version>
     </properties>
 
     <modules>
@@ -140,6 +143,13 @@
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-spring-boot-starter</artifactId>
                 <version>${dubbo.version}</version>
+            </dependency>
+
+            <!-- Springdoc OpenAPI -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
             </dependency>
 
             <!-- 内部模块依赖 -->

@@ -55,7 +55,27 @@ public enum ResponseCode {
     /**
      * 服务端验证错误
      */
-    VALIDATION_ERROR(999, "服务端验证错误");
+    VALIDATION_ERROR(999, "服务端验证错误"),
+
+    /**
+     * OAuth2认证失败
+     */
+    OAUTH2_AUTHORIZATION_FAILED(400, "OAuth2认证失败"),
+
+    /**
+     * OAuth2获取令牌失败
+     */
+    OAUTH2_TOKEN_ERROR(401, "获取访问令牌失败"),
+
+    /**
+     * OAuth2获取用户信息失败
+     */
+    OAUTH2_USER_INFO_ERROR(402, "获取用户信息失败"),
+
+    /**
+     * OAuth2用户不存在
+     */
+    OAUTH2_USER_NOT_FOUND(403, "用户不存在，请联系管理员添加");
 
     private final Integer code;
     private final String msg;

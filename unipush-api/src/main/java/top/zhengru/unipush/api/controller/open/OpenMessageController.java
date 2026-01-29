@@ -1,6 +1,9 @@
 package top.zhengru.unipush.api.controller.open;
 
 import com.alibaba.fastjson2.JSON;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,7 @@ import java.util.List;
  *
  * @author zhengru
  */
+@Tag(name = "消息发送", description = "开放消息发送接口，通过AccessToken认证")
 @RestController
 @RequestMapping("/api/open/message")
 public class OpenMessageController {
@@ -30,8 +34,11 @@ public class OpenMessageController {
      * @param messageId 消息ID
      * @return 消息结果
      */
+    @Operation(summary = "查询消息发送结果", description = "根据消息ID查询消息的发送状态和结果")
     @GetMapping("/sendMessageResult")
-    public ResponseVO<MessageResultVO> sendMessageResult(@RequestParam("messageId") String messageId) {
+    public ResponseVO<MessageResultVO> sendMessageResult(
+            @Parameter(description = "消息ID", required = true, example = "1234567890")
+            @RequestParam("messageId") String messageId) {
         // TODO: 调用Core服务查询消息结果
         MessageResultVO result = new MessageResultVO();
         result.setStatus(2);
@@ -45,8 +52,11 @@ public class OpenMessageController {
      * @param request 发送消息请求
      * @return 消息ID
      */
+    @Operation(summary = "发送单条消息", description = "通过指定渠道发送单条消息")
     @PostMapping("/send")
-    public ResponseVO<String> send(@Valid @RequestBody SendMessageDTO request) {
+    public ResponseVO<String> send(
+            @Parameter(description = "发送消息请求参数", required = true)
+            @Valid @RequestBody SendMessageDTO request) {
         // TODO: 调用Core服务发送消息
         // 1. 验证时间戳
         long currentTime = System.currentTimeMillis();
@@ -68,8 +78,11 @@ public class OpenMessageController {
      * @param request 批量发送消息请求
      * @return 批量发送结果列表
      */
+    @Operation(summary = "批量发送消息", description = "通过多个渠道同时发送消息")
     @PostMapping("/send/batch")
-    public ResponseVO<List<BatchSendResultItemVO>> sendBatch(@Valid @RequestBody BatchSendMessageDTO request) {
+    public ResponseVO<List<BatchSendResultItemVO>> sendBatch(
+            @Parameter(description = "批量发送消息请求参数", required = true)
+            @Valid @RequestBody BatchSendMessageDTO request) {
         // TODO: 调用Core服务批量发送消息
         // 1. 验证时间戳
         long currentTime = System.currentTimeMillis();
