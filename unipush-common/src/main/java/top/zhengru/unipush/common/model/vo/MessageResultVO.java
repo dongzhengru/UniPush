@@ -16,6 +16,36 @@ public class MessageResultVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
+     * 消息ID
+     */
+    private String messageId;
+
+    /**
+     * 标题
+     */
+    private String title;
+
+    /**
+     * 内容
+     */
+    private String content;
+
+    /**
+     * 渠道编码
+     */
+    private String channelCode;
+
+    /**
+     * 重试次数
+     */
+    private Integer retryCount;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
      * 状态：1-待处理 2-处理中 3-成功 4-失败
      */
     private Integer status;

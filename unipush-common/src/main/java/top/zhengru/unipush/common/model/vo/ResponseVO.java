@@ -75,6 +75,14 @@ public class ResponseVO<T> implements Serializable {
         return restResult(null, responseCode.getCode(), msg);
     }
 
+    public static <T> ResponseVO<T> error(ResponseCode responseCode, String msg) {
+        return restResult(null, responseCode.getCode(), msg);
+    }
+
+    public static <T> ResponseVO<T> error(Integer code, String msg) {
+        return restResult(null, code, msg);
+    }
+
     private static <T> ResponseVO<T> restResult(T data, Integer code, String msg) {
         ResponseVO<T> apiResult = new ResponseVO<>();
         apiResult.setCode(code);

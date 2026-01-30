@@ -114,4 +114,17 @@ public class PushMessage implements Serializable {
      * 成功时间
      */
     private LocalDateTime successTime;
+
+    /**
+     * 是否已持久化到数据库
+     * 0-未持久化 1-已持久化
+     */
+    @TableField(exist = false)  // 不映射到数据库字段，仅用于Redis中标记
+    private Integer persisted;
+
+    /**
+     * 持久化时间
+     */
+    @TableField(exist = false)  // 不映射到数据库字段
+    private LocalDateTime persistedTime;
 }

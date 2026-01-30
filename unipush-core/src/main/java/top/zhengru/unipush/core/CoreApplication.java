@@ -5,6 +5,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 核心调度服务启动类
@@ -14,6 +15,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication(scanBasePackages = "top.zhengru.unipush")
 @EnableDiscoveryClient
 @EnableDubbo
+@EnableScheduling
 @MapperScan("top.zhengru.unipush.core.mapper")
 public class CoreApplication {
 

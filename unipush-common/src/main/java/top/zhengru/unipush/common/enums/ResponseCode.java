@@ -75,7 +75,17 @@ public enum ResponseCode {
     /**
      * OAuth2用户不存在
      */
-    OAUTH2_USER_NOT_FOUND(403, "用户不存在，请联系管理员添加");
+    OAUTH2_USER_NOT_FOUND(403, "用户不存在，请联系管理员添加"),
+
+    /**
+     * 请求过于频繁（限流）
+     */
+    TOO_MANY_REQUESTS(429, "请求过于频繁，请稍后再试"),
+
+    /**
+     * 服务错误
+     */
+    SERVICE_ERROR(503, "服务暂时不可用，请稍后再试");
 
     private final Integer code;
     private final String msg;

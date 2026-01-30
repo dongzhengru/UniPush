@@ -41,4 +41,17 @@ public class RedisConstants {
      * 访问令牌 Redis Key
      */
     public static final String ACCESS_TOKEN_KEY = "access_token:";
+
+    /**
+     * 推送消息 Redis Key
+     * 格式: push:message:{messageId}
+     * 过期时间: 7天
+     */
+    public static final String PUSH_MESSAGE_KEY = "push:message:";
+
+    /**
+     * 推送消息批量写入缓存 Key（Sorted Set）
+     * 用于定时任务批量迁移到数据库
+     */
+    public static final String PUSH_MESSAGE_BATCH_KEY = "push:message:batch";
 }

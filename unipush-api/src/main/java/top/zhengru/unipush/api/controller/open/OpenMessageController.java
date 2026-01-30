@@ -1,5 +1,7 @@
 package top.zhengru.unipush.api.controller.open;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,6 +58,9 @@ public class OpenMessageController {
      */
     @Operation(summary = "发送单条消息", description = "通过指定渠道发送单条消息")
     @PostMapping("/send")
+    @SentinelResource(value = "send-message",
+            blockHandler = "sendBlockHandler",
+            fallback = "sendFallback")
     public ResponseVO<String> send(
             @Parameter(description = "发送消息请求参数", required = true)
             @Valid @RequestBody SendMessageDTO request) {
@@ -73,6 +78,20 @@ public class OpenMessageController {
     }
 
     /**
+     * 发送消息限流降级处理
+     */
+    public ResponseVO<String> sendBlockHandler(SendMessageDTO request, BlockException exception) {
+        return ResponseVO.error(ResponseCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+    }
+
+    /**
+     * 发送消息异常降级处理
+     */
+    public ResponseVO<String> sendFallback(SendMessageDTO request, Throwable throwable) {
+        return ResponseVO.error(ResponseCode.SERVICE_ERROR, "服务暂时不可用，请稍后再试");
+    }
+
+    /**
      * 多渠道发送消息
      *
      * @param request 批量发送消息请求
@@ -80,6 +99,9 @@ public class OpenMessageController {
      */
     @Operation(summary = "批量发送消息", description = "通过多个渠道同时发送消息")
     @PostMapping("/send/batch")
+    @SentinelResource(value = "send-batch-message",
+            blockHandler = "sendBatchBlockHandler",
+            fallback = "sendBatchFallback")
     public ResponseVO<List<BatchSendResultItemVO>> sendBatch(
             @Parameter(description = "批量发送消息请求参数", required = true)
             @Valid @RequestBody BatchSendMessageDTO request) {
@@ -130,5 +152,21 @@ public class OpenMessageController {
         }
 
         return ResponseVO.ok(results, "执行成功");
+    }
+
+    /**
+     * 批量发送消息限流降级处理
+     */
+    public ResponseVO<List<BatchSendResultItemVO>> sendBatchBlockHandler(
+            BatchSendMessageDTO request, BlockException exception) {
+        return ResponseVO.error(ResponseCode.TOO_MANY_REQUESTS, "批量发送请求过于频繁，请稍后再试");
+    }
+
+    /**
+     * 批量发送消息异常降级处理
+     */
+    public ResponseVO<List<BatchSendResultItemVO>> sendBatchFallback(
+            BatchSendMessageDTO request, Throwable throwable) {
+        return ResponseVO.error(ResponseCode.SERVICE_ERROR, "批量发送服务暂时不可用，请稍后再试");
     }
 }
