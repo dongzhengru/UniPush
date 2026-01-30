@@ -2,13 +2,14 @@
 
 # 🚀 UniPush
 
+**📮 UniPush 高性能统一消息推送平台 | 支持多渠道、高并发、可扩展的分布式推送系统**
+
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Java Version](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Architecture](https://img.shields.io/badge/architecture-microservice-red.svg)](https://microservices.io/)
-**📮 UniPush 高性能统一消息推送平台 | 支持多渠道、高并发、可扩展的分布式推送系统**
 
-[功能特性](#-核心特性) • [快速开始](#-快速开始) • [架构设计](#-架构设计)
+</div>
 
 ---
 
