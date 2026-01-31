@@ -309,7 +309,7 @@ unipush-backend/
 
 如果这个项目对你有帮助，请给我们一个 Star ⭐
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/unipush&type=Date)](https://star-history.com/#yourusername/unipush&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=dongzhengru/unipush&type=Date)](https://star-history.com/#dongzhengru/unipush&Date)
 
 ---
 
